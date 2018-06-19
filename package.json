@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "serverless-appsync-plugin": "^1.0.1",
+    "serverless-plugin-tracing": "^2.0.0"
+  }
+}

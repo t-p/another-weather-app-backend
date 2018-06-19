@@ -1,0 +1,43 @@
+type Destination {
+	id: ID!
+	description: String!
+	state: String!
+	city: String!
+	zip: String!
+	conditions: Weather!
+}
+
+type Mutation {
+	addDestination(
+		id: ID,
+		description: String!,
+		state: String!,
+		city: String!,
+		zip: String!
+	): Destination!
+}
+
+type Query {
+	# Get a single value of type 'Post' by primary key.
+	getDestination(id: ID!, zip: String): Destination
+	getAllDestinations: [Destination]
+	getDestinationsByState(state: String!): [Destination]
+}
+
+type Subscription {
+	newDestination: Destination
+		@aws_subscribe(mutations: ["addDestination"])
+}
+
+type Weather {
+	description: String
+	current: String
+	maxTemp: String
+	minTemp: String
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+	subscription: Subscription
+}

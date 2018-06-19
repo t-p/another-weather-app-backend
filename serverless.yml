@@ -1,0 +1,84 @@
+service: get-weather-data
+
+plugins:
+  - serverless-plugin-tracing
+  - serverless-appsync-plugin
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-west-1
+  stage: ${opt:stage, self:custom.defaultStage}
+  tracing: true
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource:
+        - "*"
+  environment:
+    awsAccountId: ${self:custom.env.awsAccountId}
+
+resources:
+  Description: "Weather App with GraphQL, Lambda and DynamoDB"
+  Resources:
+    DestinationsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: AppSync-Destinations
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+
+functions:
+  getWeatherData:
+    handler: handler.getWeatherDataFn
+    environment: 
+      APPID: ${self:custom.env.APPID}
+
+custom:
+  defaultStage: dev
+  env: ${file(./env/${self:provider.stage}.yml)}
+  roleName: AppSyncServiceRole
+  appSync:
+    name: weatherApp
+    authenticationType: API_KEY
+    schema: schema.graphql
+    serviceRole: ${self:custom.roleName}
+    mappingTemplates:
+      - dataSource: Destinations
+        type: Query
+        field: getAllDestinations
+        request: getAllDestinations-request-mapping.template
+        response: getAllDestinations-response-mapping.template
+      - dataSource: WeatherConditions
+        type: Destination
+        field: conditions
+        request: conditionsWeather-request-mapping.template
+        response: conditionsWeather-response-mapping.template
+      - dataSource: Destinations
+        type: Mutation
+        field: addDestination
+        request: getAllDestinations-request-mapping.template
+        response: getAllDestinations-response-mapping.template
+
+    dataSources:
+      - type: AMAZON_DYNAMODB
+        name: Destinations
+        description: Weather App Places
+        config:
+          tableName: { Ref: DestinationsDynamoDBTable } 
+          serviceRoleArn: arn:aws:iam::${self:custom.env.awsAccountId}:role/getWeatherData-${self:custom.roleName}
+      - type: AWS_LAMBDA
+        name: WeatherConditions
+        description: Weather App Temperatures
+        config:
+          lambdaFunctionArn: { Fn::GetAtt: [GetWeatherDataLambdaFunction, Arn] }
+          serviceRoleArn: { Fn::GetAtt: [IamRoleLambdaExecution, Arn] } 
