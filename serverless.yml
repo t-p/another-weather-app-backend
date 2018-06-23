@@ -22,20 +22,7 @@ provider:
 
 resources:
   Description: "Weather App with GraphQL, Lambda and DynamoDB"
-  Resources:
-    DestinationsDynamoDBTable:
-      Type: "AWS::DynamoDB::Table"
-      Properties:
-        TableName: AppSync-Destinations
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 10
-          WriteCapacityUnits: 10
+  Resources: ${file(./resources/resources.yml)}
 
 functions:
   getWeatherData:
@@ -68,17 +55,16 @@ custom:
         field: addDestination
         request: getAllDestinations-request-mapping.template
         response: getAllDestinations-response-mapping.template
-
     dataSources:
       - type: AMAZON_DYNAMODB
         name: Destinations
         description: Weather App Places
         config:
           tableName: { Ref: DestinationsDynamoDBTable } 
-          serviceRoleArn: arn:aws:iam::${self:custom.env.awsAccountId}:role/getWeatherData-${self:custom.roleName}
+          serviceRoleArn: { Fn::GetAtt: [ AppSyncDynamoDBServiceRole, Arn ] }
       - type: AWS_LAMBDA
         name: WeatherConditions
         description: Weather App Temperatures
         config:
-          lambdaFunctionArn: { Fn::GetAtt: [GetWeatherDataLambdaFunction, Arn] }
-          serviceRoleArn: { Fn::GetAtt: [IamRoleLambdaExecution, Arn] } 
+          lambdaFunctionArn: { Fn::GetAtt: [ GetWeatherDataLambdaFunction, Arn ] }
+          serviceRoleArn: { Fn::GetAtt: [ WeatherLambdaServiceRole, Arn ] }

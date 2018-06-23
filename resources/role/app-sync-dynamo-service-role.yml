@@ -1,0 +1,33 @@
+Type: "AWS::IAM::Role"
+Properties:
+  RoleName: "DynamoDB-${self:custom.appSync.serviceRole}-${self:service}"
+  AssumeRolePolicyDocument:
+    Version: "2012-10-17"
+    Statement:
+      -
+        Effect: "Allow"
+        Principal:
+          Service:
+            - "appsync.amazonaws.com"
+        Action:
+          - "sts:AssumeRole"
+  Policies:
+    -
+      PolicyName: "DynamoDB-${self:custom.appSync.serviceRole}-Policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Action: 
+              - "dynamodb:*"
+            Resource:
+              - 'Fn::Join':
+                  - ''
+                  -
+                    - 'arn:aws:dynamodb:'
+                    - Ref: 'AWS::Region'
+                    - ':'
+                    - Ref: 'AWS::AccountId'
+                    - ':table/'
+                    - Ref: DestinationsDynamoDBTable
