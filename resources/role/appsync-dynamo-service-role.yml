@@ -1,6 +1,6 @@
 Type: "AWS::IAM::Role"
 Properties:
-  RoleName: "DynamoDB-${self:custom.appSync.serviceRole}-${self:service}"
+  RoleName: ${self:service}-${self:custom.appSync.serviceRole}-DynamoDB
   AssumeRolePolicyDocument:
     Version: "2012-10-17"
     Statement:
@@ -13,7 +13,7 @@ Properties:
           - "sts:AssumeRole"
   Policies:
     -
-      PolicyName: "DynamoDB-${self:custom.appSync.serviceRole}-Policy"
+      PolicyName: "${self:custom.appSync.serviceRole}-DynamoDB-Policy"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:

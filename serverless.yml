@@ -11,13 +11,6 @@ provider:
   region: eu-west-1
   stage: ${opt:stage, self:custom.defaultStage}
   tracing: true
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "xray:PutTraceSegments"
-        - "xray:PutTelemetryRecords"
-      Resource:
-        - "*"
   environment:
     awsAccountId: ${self:custom.env.awsAccountId}
 
@@ -28,6 +21,7 @@ resources:
 functions:
   getWeatherData:
     handler: handler.getWeatherDataFn
+    role: LambdaWeatherServiceRole
     environment: 
       APPID: ${self:custom.env.APPID}
 
@@ -54,8 +48,8 @@ custom:
       - dataSource: Destinations
         type: Mutation
         field: addDestination
-        request: getAllDestinations-request-mapping-template.txt
-        response: getAllDestinations-response-mapping-template.txt
+        request: addDestination-request-mapping-template.txt
+        response: addDestination-response-mapping-template.txt
     dataSources:
       - type: AMAZON_DYNAMODB
         name: Destinations

@@ -3,3 +3,4 @@ DestinationsDynamoDBTable: ${file(./resources/dynamo-db/destinations-table.yml)}
 # Roles
 AppSyncDynamoDBServiceRole: ${file(./resources/role/appsync-dynamo-service-role.yml)}
 AppSyncWeatherLambdaServiceRole: ${file(./resources/role/appsync-weather-lambda-service-role.yml)}
+LambdaWeatherServiceRole: ${file(./resources/role/lambda-weather-service-role.yml)}

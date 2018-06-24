@@ -1,6 +1,6 @@
 Type: "AWS::DynamoDB::Table"
 Properties:
-  TableName: ${self:custom.dynamoDBTableName}
+  TableName: AppSync-Destinations
   AttributeDefinitions:
     - AttributeName: id
       AttributeType: S
